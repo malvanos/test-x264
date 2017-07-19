@@ -1642,6 +1642,15 @@ generic_option:
     }
     else FAIL_IF_ERROR( !info.vfr && input_opt.timebase, "--timebase is incompatible with cfr input\n" );
 
+    if ( !param->i_bitdepth ) {
+        #if HAVE_BITDEPTH10
+            param->i_bitdepth = 10;
+        #endif
+        #if HAVE_BITDEPTH8
+            param->i_bitdepth = 8;
+        #endif
+    }
+
     /* init threaded input while the information about the input video is unaltered by filtering */
 #if HAVE_THREAD
     cli_input_t thread_input;
