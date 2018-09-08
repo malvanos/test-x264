@@ -150,8 +150,7 @@ typedef union {
  **********************************************************************/
 #ifndef __POWER9_VECTOR__
 #define VEC_STORE8( v, p )                        \
-    v = vec_xxpermdi( v, vec_vsx_ld( 0, p ), 1 ); \
-    vec_vsx_st( v, 0, p )
+    vec_vsx_st( vec_xxpermdi( v, vec_vsx_ld( 0, p ), 1 ), 0, p)
 #else
 #define VEC_STORE8( v, p ) vec_xst_len( v, p, 8 )
 #endif
