@@ -348,48 +348,26 @@ int x264_quant_4x4_dc_altivec( int16_t dct[16], int mf, int bias )
     return vec_any_ne(nz, zero_s16v);
 }
 
-// DC quant of a whole 2x2 block
-#define QUANT_4_U_DC( idx0 )                                        \
-{                                                                   \
-    const vec_u16_t sel = (vec_u16_t) CV(-1,-1,-1,-1,0,0,0,0);      \
-    temp1v = vec_ld((idx0), dct);                                   \
-    mskA = vec_cmplt(temp1v, zero_s16v);                            \
-    coefvA = (vec_u16_t)vec_max(vec_sub(zero_s16v, temp1v), temp1v);\
-    coefvA = vec_add(coefvA, biasv);                                \
-    multEvenvA = vec_mule(coefvA, mfv);                             \
-    multOddvA = vec_mulo(coefvA, mfv);                              \
-    multEvenvA = vec_sr(multEvenvA, i_qbitsv);                      \
-    multOddvA = vec_sr(multOddvA, i_qbitsv);                        \
-    temp2v = (vec_s16_t) vec_packs(vec_mergeh(multEvenvA, multOddvA), vec_mergel(multEvenvA, multOddvA)); \
-    temp2v = vec_xor(temp2v, mskA);                                 \
-    temp2v = vec_add(temp2v, vec_and(mskA, one));                   \
-    temp1v = vec_sel(temp1v, temp2v, sel);                          \
-    nz = vec_or(nz, temp1v);                                        \
-    vec_st(temp1v, (idx0), dct);                                    \
+#define QUANT_ONE( coef, mf, f ) \
+{ \
+    uint32_t coef_neg  = ((int32_t)(coef) >> 31);\
+    if( (coef_neg) ) \
+        (coef) = - ((f - (coef)) * (mf) >> 16); \
+    else \
+        (coef) = (f + (coef)) * (mf) >> 16; \
+    nz |= (coef); \
 }
 
 int x264_quant_2x2_dc_altivec( int16_t dct[4], int mf, int bias )
 {
-    LOAD_ZERO;
-    vector bool short mskA;
-    vec_u32_t i_qbitsv;
-    vec_u16_t coefvA;
-    vec_u32_t multEvenvA, multOddvA;
-    vec_s16_t one = vec_splat_s16(1);
-    vec_s16_t nz = zero_s16v;
-    static const vec_s16_t mask2 = CV(-1, -1, -1, -1,  0, 0, 0, 0);
+	int nz = 0;
 
-    vec_s16_t temp1v, temp2v;
+	for (int i=0; i<4; i++)
+	{
+		QUANT_ONE( dct[i], mf, bias );	
+	}
+	return !!nz;
 
-    vec_u16_t mfv;
-    vec_u16_t biasv;
-
-    mfv = vec_splats( (uint16_t)mf );
-    i_qbitsv = vec_splats( (uint32_t) 16 );
-    biasv = vec_splats( (uint16_t)bias );
-
-    QUANT_4_U_DC(0);
-    return vec_any_ne(vec_and(nz, mask2), zero_s16v);
 }
 
 int x264_quant_8x8_altivec( int16_t dct[64], uint16_t mf[64], uint16_t bias[64] )
