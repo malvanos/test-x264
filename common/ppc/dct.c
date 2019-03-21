@@ -648,13 +648,13 @@ void x264_zigzag_scan_4x4_field_altivec( int16_t level[16], int16_t dct[16] )
     dct0v = vec_ld(0x00, dct);
     dct1v = vec_ld(0x10, dct);
 
-    const vec_u8_t sel0 = (vec_u8_t) CV(0,1,2,3,8,9,4,5,6,7,10,11,12,13,14,15);
+    vec_st( dct0v, 0x00, level );
+    vec_st( dct1v, 0x10, level );
 
-    tmp0v = vec_perm( dct0v, dct1v, sel0 );
-    tmp1v = dct1v;
+	level[2] = dct[4];
+	level[3] = dct[2];
+	level[4] = dct[3];
 
-    vec_st( tmp0v, 0x00, level );
-    vec_st( tmp1v, 0x10, level );
 }
 
 void x264_zigzag_scan_8x8_frame_altivec( int16_t level[64], int16_t dct[64] )
