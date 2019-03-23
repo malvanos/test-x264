@@ -640,10 +640,12 @@ void x264_zigzag_scan_4x4_frame_altivec( int16_t level[16], int16_t dct[16] )
     vec_st( tmp1v, 0x10, level );
 }
 
-void x264_zigzag_scan_4x4_field_altivec( int16_t level[16], int16_t dct[16] )
+#define COPY4BYTES(a,b) *(uint32_t *) &(a) =  *(uint32_t *) &(b)
+#define COPY8BYTES(a,b) *(uint64_t *) &(a) =  *(uint64_t *) &(b)
+
+void x264_zigzag_scan_4x4_field_altivec( dctcoef level[16], dctcoef dct[16] )
 {
     vec_s16_t dct0v, dct1v;
-    vec_s16_t tmp0v, tmp1v;
 
     dct0v = vec_ld(0x00, dct);
     dct1v = vec_ld(0x10, dct);
@@ -651,10 +653,8 @@ void x264_zigzag_scan_4x4_field_altivec( int16_t level[16], int16_t dct[16] )
     vec_st( dct0v, 0x00, level );
     vec_st( dct1v, 0x10, level );
 
-	level[2] = dct[4];
-	level[3] = dct[2];
-	level[4] = dct[3];
-
+    COPY4BYTES(level[3], dct[2]);
+    level[2] = dct[4];
 }
 
 void x264_zigzag_scan_8x8_frame_altivec( int16_t level[64], int16_t dct[64] )
