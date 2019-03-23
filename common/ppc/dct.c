@@ -659,77 +659,81 @@ void x264_zigzag_scan_4x4_field_altivec( dctcoef level[16], dctcoef dct[16] )
 
 void x264_zigzag_scan_8x8_frame_altivec( int16_t level[64], int16_t dct[64] )
 {
-    vec_s16_t tmpv[6];
-    vec_s16_t dct0v = vec_ld( 0*16, dct );
-    vec_s16_t dct1v = vec_ld( 1*16, dct );
-    vec_s16_t dct2v = vec_ld( 2*16, dct );
-    vec_s16_t dct3v = vec_ld( 3*16, dct );
-    vec_s16_t dct4v = vec_ld( 4*16, dct );
-    vec_s16_t dct5v = vec_ld( 5*16, dct );
-    vec_s16_t dct6v = vec_ld( 6*16, dct );
-    vec_s16_t dct7v = vec_ld( 7*16, dct );
+    level[0] = dct[0];
+    level[1] = dct[8];
 
-    const vec_u8_t mask1[14] = {
-        { 0x00, 0x01, 0x02, 0x03, 0x12, 0x13, 0x14, 0x15, 0x0A, 0x0B, 0x04, 0x05, 0x06, 0x07, 0x0C, 0x0D },
-        { 0x0A, 0x0B, 0x0C, 0x0D, 0x00, 0x00, 0x0E, 0x0F, 0x00, 0x00, 0x00, 0x00, 0x10, 0x11, 0x12, 0x13 },
-        { 0x00, 0x01, 0x02, 0x03, 0x18, 0x19, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F },
-        { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x18, 0x19, 0x16, 0x17, 0x0C, 0x0D, 0x0E, 0x0F },
-        { 0x00, 0x00, 0x14, 0x15, 0x18, 0x19, 0x02, 0x03, 0x04, 0x05, 0x08, 0x09, 0x06, 0x07, 0x12, 0x13 },
-        { 0x12, 0x13, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F },
-        { 0x1A, 0x1B, 0x10, 0x11, 0x08, 0x09, 0x04, 0x05, 0x02, 0x03, 0x0C, 0x0D, 0x14, 0x15, 0x18, 0x19 },
-        { 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x0A, 0x0B },
-        { 0x00, 0x01, 0x02, 0x03, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x06, 0x07, 0x04, 0x05, 0x08, 0x09 },
-        { 0x00, 0x11, 0x16, 0x17, 0x18, 0x19, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x1A, 0x1B },
-        { 0x02, 0x03, 0x18, 0x19, 0x16, 0x17, 0x1A, 0x1B, 0x1C, 0x1D, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09 },
-        { 0x08, 0x09, 0x0A, 0x0B, 0x06, 0x07, 0x0E, 0x0F, 0x10, 0x11, 0x00, 0x00, 0x12, 0x13, 0x14, 0x15 },
-        { 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x16, 0x17, 0x0C, 0x0D, 0x0E, 0x0F },
-        { 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x08, 0x09, 0x06, 0x07, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F }
-    };
+    COPY4BYTES(level[2],dct[1]);
 
-    tmpv[0] = vec_mergeh( dct0v, dct1v );
-    tmpv[1] = vec_mergeh( dct2v, dct3v );
-    tmpv[2] = (vec_s16_t)vec_mergeh( (vec_s32_t)tmpv[0], (vec_s32_t)tmpv[1] );
-    tmpv[3] = vec_perm( tmpv[2], dct0v, mask1[0] );
-    vec_st( tmpv[3], 0*16, level );
+    level[4] = dct[9]; 
+    level[5] = dct[16]; 
+    level[6] = dct[24]; 
+    level[7] = dct[17];
 
-    tmpv[4] = vec_mergeh( dct4v, dct5v );
-    tmpv[3] = vec_perm( tmpv[0], tmpv[4], mask1[1] );
-    tmpv[3] = vec_perm( tmpv[3], dct0v, mask1[2] );
-    tmpv[3] = vec_perm( tmpv[3], tmpv[1], mask1[3] );
-    vec_st( tmpv[3], 1*16, level );
+    level[8] = dct[10]; 
+    COPY4BYTES(level[9],dct[3]);
+    level[11] = dct[11];
 
-    tmpv[3] = vec_mergel( dct0v, dct1v );
-    tmpv[1] = vec_mergel( tmpv[1], dct2v );
-    tmpv[5] = vec_perm( tmpv[3], tmpv[1], mask1[4] );
-    tmpv[5] = vec_perm( tmpv[5], dct4v, mask1[5] );
-    vec_st( tmpv[5], 2*16, level );
+    level[12] = dct[18]; 
+    level[13] = dct[25]; 
+    level[14] = dct[32]; 
+    level[15] = dct[40];
 
-    tmpv[2] = vec_mergeh( dct5v, dct6v );
-    tmpv[5] = vec_mergeh( tmpv[2], dct7v );
-    tmpv[4] = vec_mergel( tmpv[4], tmpv[1] );
-    tmpv[0] = vec_perm( tmpv[5], tmpv[4], mask1[6] );
-    vec_st( tmpv[0], 3*16, level );
+    level[16] = dct[33]; 
+    level[17] = dct[26]; 
+    level[18] = dct[19]; 
+    level[19] = dct[12];
 
-    tmpv[1] = vec_mergel( dct2v, dct3v );
-    tmpv[0] = vec_mergel( dct4v, dct5v );
-    tmpv[4] = vec_perm( tmpv[1], tmpv[0], mask1[7] );
-    tmpv[3] = vec_perm( tmpv[4], tmpv[3], mask1[8] );
-    vec_st( tmpv[3], 4*16, level );
+    COPY4BYTES(level[20],dct[5]);
+    level[22] = dct[13]; 
+    level[23] = dct[20];
 
-    tmpv[3] = vec_mergeh( dct6v, dct7v );
-    tmpv[2] = vec_mergel( dct3v, dct4v );
-    tmpv[2] = vec_perm( tmpv[2], dct5v, mask1[9] );
-    tmpv[3] = vec_perm( tmpv[2], tmpv[3], mask1[10] );
-    vec_st( tmpv[3], 5*16, level );
+    level[24] = dct[27]; 
+    level[25] = dct[34]; 
+    level[26] = dct[41]; 
+    level[27] = dct[48];
 
-    tmpv[1] = vec_mergel( tmpv[1], tmpv[2] );
-    tmpv[2] = vec_mergel( dct6v, dct7v );
-    tmpv[1] = vec_perm( tmpv[1], tmpv[2], mask1[11] );
-    tmpv[1] = vec_perm( tmpv[1], dct7v, mask1[12] );
-    vec_st( tmpv[1], 6*16, level );
+    level[28] = dct[56]; 
+    level[29] = dct[49]; 
+    level[30] = dct[42]; 
+    level[31] = dct[35];
 
-    tmpv[2] = vec_perm( tmpv[2], tmpv[0], mask1[13] );
-    vec_st( tmpv[2], 7*16, level );
+    level[32] = dct[28]; 
+    level[33] = dct[21]; 
+    level[34] = dct[14]; 
+    level[35] = dct[7];
+
+    level[36] = dct[15]; 
+    level[37] = dct[22]; 
+    level[38] = dct[29]; 
+    level[39] = dct[36];
+
+    level[40] = dct[43]; 
+    level[41] = dct[50];
+    COPY4BYTES(level[42],dct[57]);
+
+    level[44] = dct[51]; 
+    level[45] = dct[44]; 
+    level[46] = dct[37]; 
+    level[47] = dct[30];
+
+    level[48] = dct[23]; 
+    level[49] = dct[31]; 
+    level[50] = dct[38]; 
+    level[51] = dct[45];
+
+    level[52] = dct[52]; 
+    level[53] = dct[59]; 
+    level[54] = dct[60]; 
+    level[55] = dct[53];
+
+    level[56] = dct[46]; 
+    level[57] = dct[39]; 
+    level[58] = dct[47]; 
+    level[59] = dct[54];
+
+    COPY4BYTES(level[60],dct[61]);
+    level[62] = dct[55]; 
+    level[63] = dct[63];
 }
 
 void x264_zigzag_interleave_8x8_cavlc_altivec( int16_t *dst, int16_t *src, uint8_t *nnz )
